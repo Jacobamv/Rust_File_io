@@ -1,3 +1,5 @@
+extern crate rustc_serialize;
+use rustc_serialize::json::Json;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -8,6 +10,14 @@ pub enum Result<T, E> {
     Err(E),
 }
 
+impl <T, E> Result<T, E>  {
+    fn unwrap(self) -> T{
+        match self {
+            Result::Ok(v) => return v,
+            Result::Err(e) => panic!("Unwrap error {}"),
+        }
+    }
+}
 
 pub fn check_file_exists(a: &str) -> bool {
     println!("Checking File Exists");
@@ -48,4 +58,12 @@ pub fn write_file(a: &str, b: &[u8]) -> Result<String, String> {
         let _writing = file.write_all(b).unwrap();
         return Result::Ok(String::from("Done"))
     }
+}
+
+pub fn read_json(a: &str) -> Json {
+    let a = read_file(a).unwrap();
+    let b = Box::leak(a.into_boxed_str());
+
+    let json = Json::from_str(b).unwrap();
+    json
 }
